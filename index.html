@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Tetris UI</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="panel game-panel">
+        <div class="panel-header">
+          <h1>Simple Tetris</h1>
+        </div>
+
+        <div class="game-area">
+          <div class="subpanel left-panel">
+            <div class="panel-label">Player 1</div>
+            <div class="preview-box">
+              <span class="preview-label">Next</span>
+              <div id="next-piece" class="next-piece"></div>
+            </div>
+            <div id="board" class="board" aria-label="Tetris board"></div>
+          </div>
+
+          <div class="subpanel center-panel">
+            <div class="card">
+              <h2>Controls</h2>
+              <ul>
+                <li>
+                  <span id="key-left-display" class="binding-key">←</span> move
+                  left
+                </li>
+                <li>
+                  <span id="key-right-display" class="binding-key">→</span> move
+                  right
+                </li>
+                <li>
+                  <span id="key-rotate-display" class="binding-key">↑</span>
+                  rotate
+                </li>
+                <li>
+                  <span id="key-harddrop-display" class="binding-key"
+                    >Space</span
+                  >
+                  hard drop
+                </li>
+              </ul>
+            </div>
+            <button id="change-controls-btn" class="control-btn">
+              Change Controls
+            </button>
+            <button id="restart-btn" class="restart-btn">
+              Start / Restart
+            </button>
+            <button id="stop-btn" class="control-btn">Stop</button>
+          </div>
+
+          <div class="subpanel right-panel">
+            <div class="panel-label" id="right-panel-label">Buffer</div>
+            <div class="preview-box player-preview hidden" id="player2-preview">
+              <span class="preview-label">Next P2</span>
+              <div id="next-piece-2" class="next-piece"></div>
+            </div>
+            <div class="buffer-level-row">
+              <div id="buffer-board" class="board buffer-board"></div>
+              <div id="level-row" class="level-row">
+                <div id="level-dots" class="level-dots"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="mode-modal" class="modal open" aria-hidden="false">
+      <div class="modal-backdrop" id="mode-modal-backdrop"></div>
+      <div class="modal-content">
+        <h2>Select Game Mode</h2>
+        <p>Please choose Single or VS mode before starting.</p>
+        <div class="mode-buttons">
+          <button id="one-player-btn" class="control-btn">Single Mode</button>
+          <button id="two-player-btn" class="control-btn">VS Mode</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="controls-modal" class="modal" aria-hidden="true">
+      <div class="modal-backdrop" id="controls-modal-backdrop"></div>
+      <div class="modal-content">
+        <button
+          id="close-controls-modal"
+          class="modal-close"
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <h2>Change Controls</h2>
+        <div class="player-select" id="player-select">
+          <button
+            id="player1-controls-btn"
+            type="button"
+            class="control-btn selected"
+          >
+            Player 1
+          </button>
+          <button id="player2-controls-btn" type="button" class="control-btn">
+            Player 2
+          </button>
+        </div>
+        <p id="controls-instructions">Select an action and press a new key.</p>
+        <div id="controls-list" class="controls-list"></div>
+        <div class="modal-actions">
+          <button id="close-controls-btn" class="control-btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
