@@ -394,6 +394,16 @@ let gameOver = false;
 let gamePaused = false;
 let gameMode = null;
 let selectedControlPlayer = "p1";
+const horizontalMoveRepeatDelay = 110;
+const horizontalMoveRepeatInterval = 45;
+const horizontalRepeatState = {
+  p1: { left: false, right: false },
+  p2: { left: false, right: false },
+};
+const horizontalRepeatTimers = {
+  p1: { left: null, right: null },
+  p2: { left: null, right: null },
+};
 
 document.body.tabIndex = -1;
 
@@ -835,7 +845,72 @@ function resetDropTimers() {
   }
 }
 
+function clearHorizontalRepeatTimers() {
+  Object.values(horizontalRepeatTimers).forEach((playerTimers) => {
+    Object.values(playerTimers).forEach((timerId) => {
+      if (timerId) clearInterval(timerId);
+    });
+  });
+
+  Object.keys(horizontalRepeatState).forEach((player) => {
+    horizontalRepeatState[player].left = false;
+    horizontalRepeatState[player].right = false;
+  });
+
+  Object.keys(horizontalRepeatTimers).forEach((player) => {
+    horizontalRepeatTimers[player].left = null;
+    horizontalRepeatTimers[player].right = null;
+  });
+}
+
+function startHorizontalRepeat(player, direction) {
+  const side = direction < 0 ? "left" : "right";
+  const state = horizontalRepeatState[player];
+
+  if (state[side]) return;
+
+  state[side] = true;
+  if (direction < 0) state.right = false;
+  else state.left = false;
+
+  movePiece(0, direction, player);
+
+  const timerId = setTimeout(() => {
+    if (!gameMode || gameOver || gamePaused || !horizontalRepeatState[player][side]) {
+      horizontalRepeatTimers[player][side] = null;
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      if (!gameMode || gameOver || gamePaused || !horizontalRepeatState[player][side]) {
+        clearInterval(intervalId);
+        horizontalRepeatTimers[player][side] = null;
+        return;
+      }
+
+      movePiece(0, direction, player);
+    }, horizontalMoveRepeatInterval);
+
+    horizontalRepeatTimers[player][side] = intervalId;
+  }, horizontalMoveRepeatDelay);
+
+  horizontalRepeatTimers[player][side] = timerId;
+}
+
+function stopHorizontalRepeat(player, direction) {
+  const side = direction < 0 ? "left" : "right";
+  const state = horizontalRepeatState[player];
+  state[side] = false;
+
+  const timerId = horizontalRepeatTimers[player][side];
+  if (timerId) {
+    clearInterval(timerId);
+    horizontalRepeatTimers[player][side] = null;
+  }
+}
+
 function startGame() {
+  clearHorizontalRepeatTimers();
   board = createBoard();
   board2 = createBoard();
   bufferBoard = createBufferBoard();
@@ -865,6 +940,7 @@ function startGame() {
 }
 
 function stopGame() {
+  clearHorizontalRepeatTimers();
   gamePaused = true;
   if (dropTimer) clearInterval(dropTimer);
   if (dropTimer2) clearInterval(dropTimer2);
@@ -895,12 +971,16 @@ function handleKey(event) {
 
   if (key === p1.left) {
     event.preventDefault();
-    movePiece(0, -1, "p1");
+    if (!event.repeat) {
+      startHorizontalRepeat("p1", -1);
+    }
     return;
   }
   if (key === p1.right) {
     event.preventDefault();
-    movePiece(0, 1, "p1");
+    if (!event.repeat) {
+      startHorizontalRepeat("p1", 1);
+    }
     return;
   }
   if (key === p1.rotate) {
@@ -917,12 +997,16 @@ function handleKey(event) {
   if (gameMode === "two") {
     if (key === p2.left) {
       event.preventDefault();
-      movePiece(0, -1, "p2");
+      if (!event.repeat) {
+        startHorizontalRepeat("p2", -1);
+      }
       return;
     }
     if (key === p2.right) {
       event.preventDefault();
-      movePiece(0, 1, "p2");
+      if (!event.repeat) {
+        startHorizontalRepeat("p2", 1);
+      }
       return;
     }
     if (key === p2.rotate) {
@@ -933,6 +1017,33 @@ function handleKey(event) {
     if (key === p2.hardDrop) {
       event.preventDefault();
       while (movePiece(1, 0, "p2")) {}
+      return;
+    }
+  }
+}
+
+function handleKeyUp(event) {
+  if (!gameMode || gameOver || gamePaused) return;
+  const key = event.key;
+  const p1 = keyBindings.p1;
+  const p2 = keyBindings.p2;
+
+  if (key === p1.left) {
+    stopHorizontalRepeat("p1", -1);
+    return;
+  }
+  if (key === p1.right) {
+    stopHorizontalRepeat("p1", 1);
+    return;
+  }
+
+  if (gameMode === "two") {
+    if (key === p2.left) {
+      stopHorizontalRepeat("p2", -1);
+      return;
+    }
+    if (key === p2.right) {
+      stopHorizontalRepeat("p2", 1);
       return;
     }
   }
@@ -978,6 +1089,7 @@ twoPlayerBtn.addEventListener("click", () => selectMode("two"));
 player1ControlsBtn.addEventListener("click", () => switchControlPlayer("p1"));
 player2ControlsBtn.addEventListener("click", () => switchControlPlayer("p2"));
 document.addEventListener("keydown", handleKey);
+document.addEventListener("keyup", handleKeyUp);
 
 function selectMode(mode) {
   gameMode = mode;
