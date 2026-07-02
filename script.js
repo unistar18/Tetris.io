@@ -831,12 +831,12 @@ function resetDropTimers() {
 
   if (elapsedSeconds < 60) {
     speed = 800;
-  } else if (elapsedSeconds < 120) {
+  } else if (elapsedSeconds < 90) {
     speed = 600;
-  } else if (elapsedSeconds < 180) {
+  } else if (elapsedSeconds < 120) {
     speed = 400;
   } else {
-    speed = 400;
+    speed = 200;
   }
 
   dropTimer = setInterval(() => movePiece(1, 0, "p1"), speed);
@@ -876,13 +876,23 @@ function startHorizontalRepeat(player, direction) {
   movePiece(0, direction, player);
 
   const timerId = setTimeout(() => {
-    if (!gameMode || gameOver || gamePaused || !horizontalRepeatState[player][side]) {
+    if (
+      !gameMode ||
+      gameOver ||
+      gamePaused ||
+      !horizontalRepeatState[player][side]
+    ) {
       horizontalRepeatTimers[player][side] = null;
       return;
     }
 
     const intervalId = setInterval(() => {
-      if (!gameMode || gameOver || gamePaused || !horizontalRepeatState[player][side]) {
+      if (
+        !gameMode ||
+        gameOver ||
+        gamePaused ||
+        !horizontalRepeatState[player][side]
+      ) {
         clearInterval(intervalId);
         horizontalRepeatTimers[player][side] = null;
         return;
