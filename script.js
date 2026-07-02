@@ -411,15 +411,13 @@ const defaultKeyBindings = {
   p1: {
     left: "ArrowLeft",
     right: "ArrowRight",
-    down: "ArrowDown",
-    rotate: "ArrowUp",
+    rotate: "ArrowDown",
     hardDrop: " ",
   },
   p2: {
     left: "a",
     right: "d",
-    down: "s",
-    rotate: "w",
+    rotate: "s",
     hardDrop: "Control",
   },
 };
@@ -430,7 +428,25 @@ let keyBindings = {
 };
 
 function createBoard() {
-  return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  const board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  const bottomRows = [ROWS - 2, ROWS - 1];
+
+  bottomRows.forEach((rowIndex) => {
+    const gapCount = Math.random() < 0.5 ? 1 : 2;
+    const gapPositions = new Set();
+
+    while (gapPositions.size < gapCount) {
+      gapPositions.add(Math.floor(Math.random() * COLS));
+    }
+
+    for (let col = 0; col < COLS; col += 1) {
+      if (!gapPositions.has(col)) {
+        board[rowIndex][col] = "#9ca3af";
+      }
+    }
+  });
+
+  return board;
 }
 
 function createBufferBoard() {
@@ -885,6 +901,16 @@ function startHorizontalRepeat(player, direction) {
       horizontalRepeatTimers[player][side] = null;
       return;
     }
+
+    const piece = player === "p1" ? currentPiece : currentPiece2;
+    const targetBoard = player === "p1" ? board : board2;
+    if (!piece) return;
+
+    while (isValidMovement(piece, 0, direction, piece.matrix, targetBoard)) {
+      piece.col += direction;
+    }
+
+    draw();
 
     const intervalId = setInterval(() => {
       if (
